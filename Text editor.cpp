@@ -9,13 +9,16 @@ typedef struct Line {
 
 // Pointer for linked list
 Line *head = NULL;
+const char *filename = "C:\\Users\\Professional\\Desktop\\оп\\assignment-four-hanna_bila_victoria_loziak\\sherlock.txt";
 
 void write_text();
 void start_new_line();
 void print_text();
+void save_text_to_file();
 void insert_text();
 void free_memory();
 void print_help();
+void load_text_from_file(const char *filename);
 
 int main() {
     int command;
@@ -38,13 +41,20 @@ int main() {
             case 2:
                 start_new_line();
                 break;
-            case 5:
+            case 3:
                 print_text();
                 break;
+            case 4:
+                save_text_to_file();
+                break;
+            case 5: {
+                load_text_from_file(filename);
+                break;
+            }
             case 6:
                 insert_text();
                 break;
-            case 9:
+            case 7:
                 print_help();
                 break;
             default:
@@ -110,6 +120,60 @@ void print_text() {
     }
 }
 
+void save_text_to_file() {
+    FILE *file = fopen("saved_text.txt", "w");
+    if(file == NULL) {
+        printf("Error opening file.\n");
+    }
+
+    Line *current = head;
+    while(current != NULL) {
+        fprintf(file, "%s\n", current->text);
+        current = current->next;
+    }
+
+    fclose(file);
+    printf("Text was saved successfully.\n");
+}
+
+void load_text_from_file(const char *filename) {
+    FILE *file = fopen(filename, "r");
+    if(file == NULL) {
+        printf("Error opening file.\n");
+        return;
+    }
+
+    char buffer[100];
+    while(fgets(buffer, 100, file) != NULL) {
+        buffer[strcspn(buffer, "\n")] = '\0'; // рахуємо кількість символів до /n і змінюємо на /0
+        Line *new_line = (Line *)malloc(sizeof(Line));
+        if(new_line == NULL) {
+            printf("Memory allocation failed.\n");
+            fclose(file);
+            free(new_line);
+            return;
+        }
+        new_line->text = strdup(buffer);
+        if(new_line->text == NULL) {
+            printf("Memory allocation failed.\n");
+            fclose(file);
+            return;
+        }
+        new_line->next = NULL;
+        if(head == NULL) {
+            head = new_line;
+        }
+        else {
+            Line *current = head;
+            while(current->next != NULL) {
+                current = current->next;
+            }
+            current->next = new_line;
+        }
+    }
+    fclose(file);
+    printf("Text loaded successfully.\n");
+}
 
 void insert_text() {
     int line, index;
@@ -166,7 +230,9 @@ void print_help() {
     printf("0: Exit\n");
     printf("1: Write your text\n");
     printf("2: Start new line\n");
-    printf("3: Print text\n");
-    printf("4: Insert text\n");
-    printf("5: Help\n");
+    printf("3: Print your current text\n");
+    printf("4: Save text to file: saved_text\n");
+    printf("5: Load text from file\n");
+    printf("6: Insert text\n");
+    printf("7: Help\n");
 }
