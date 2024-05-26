@@ -54,9 +54,9 @@ int main() {
                 load_text_from_file(filename);
                 break;
             }
-            /*case 6:
+            case 6:
                 insert_text();
-                break;*/
+                break;
             case 7:
                 find_longest_substring();
                 break;
