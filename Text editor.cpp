@@ -1,14 +1,28 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <iostream>
+#include <fstream>
+#include <string>
+#include <cstdlib>
+#include <cstring>
 
-typedef struct Line {
-    char *text;
-    struct Line *next;
-} Line;
+using namespace std;
+
+class Line {
+public:
+    char* text;
+    Line* next;
+
+    Line() {
+        text = new char[1];
+        text[0] = '\0';
+        next = nullptr;
+    }
+    ~Line() {
+        delete[] text;
+    }
+};
 
 // поінтер
-Line *head = NULL;
+Line *head = nullptr;
 const char *filename = "C:\\Users\\Professional\\Desktop\\оп\\assignment-four-hanna_bila_victoria_loziak\\sherlock.txt";
 
 void write_text();
@@ -29,15 +43,14 @@ int main() {
 
     print_help();
 
-    while (1) {
-        printf("Choose the command:\n");
-        scanf("%d", &command); //%d-expecting to get number from user and write it in command
-        getchar(); // getting number that user wrote
+    while (true) {
+        cout << "Choose the command:\n";
+        cin >> command;
+        cin.ignore(); // To remove the newline character left in the input buffer
 
         switch (command) {
             case 0:
-                free_memory();
-                exit(0);
+                return 0;
             case 1:
                 write_text();
                 break;
@@ -73,185 +86,182 @@ int main() {
                 clean_console();
                 break;
             default:
-                printf("The command is not implemented.\n");
+                cout << "The command is not implemented.\n";
         }
     }
 }
 
-void free_memory() {
-    Line *current = head;
-    while (current != NULL) {
-        Line *next = current->next; // зберігаємо посилання на наступний елемент
-        free(current->text);
-        free(current);
-        current = next;
+Line* get_line(int line_number) {
+    Line* current = head;
+    for (int i = 0; i < line_number; ++i) {
+        if (current == nullptr) {
+            return nullptr;
+        }
+        current = current->next;
     }
+    return current;
 }
 
+
 void write_text() {
-    if (head == NULL) {
-        head = (Line *)malloc(sizeof(Line));
-        head->text = (char *)malloc(1);//виділяє пам'ять для зберігання рядка, здатного вмістити лише один символ(\0)
-        head->text[0] = '\0';
-        head->next = NULL;
+    if (head == nullptr) {
+        head = new Line;
     }
 
-    Line *current = head;
-    while (current->next != NULL) {
+    Line* current = head;
+    while (current->next != nullptr) {
         current = current->next;
     }
 
     char buffer[100];
-    printf("Enter your text: ");
-    fgets(buffer, 100, stdin); // stdin - зчитування символів з клавіатури(з консолі)
-    buffer[strcspn(buffer, "\n")] = '\0'; // замінюємо символ переносу рядка на символ нульового рядка
+    cout << "Enter your text: ";
+    cin.getline(buffer, 100);
 
     int new_length = strlen(current->text) + strlen(buffer) + 1; // +1 для "\0" динамічне збільшення рядка
-    current->text = (char *)realloc(current->text, new_length); // переписуємо пам'ять рядка
-    strcat(current->text, buffer); // приєднання buffer до current text
+    char* new_text = new char[new_length]; // переписуємо пам'ять рядка
+    strcpy(new_text, current->text);
+    strcat(new_text, buffer); // приєднання buffer до new text
+
+    delete[] current->text;
+    current->text = new_text;
 }
 
 void start_new_line() {
-    Line *new_line = (Line *)malloc(sizeof(Line));
-    new_line->text = (char *)malloc(1);
-    new_line->text[0] = '\0';
-    new_line->next = NULL;
+    Line* new_line = new Line();
 
-    if (head == NULL) {
+    if (head == nullptr) {
         head = new_line;
     } else {
         Line *current = head;
-        while (current->next != NULL) {
+        while (current->next != nullptr) {
             current = current->next;
         }
         current->next = new_line;
     }
 
-    printf("New line is started.\n");
+    cout << "New line is started.\n";
 }
 
 void print_text() {
-    Line *current = head;
-    while (current != NULL) {
-        char *text = current->text;
-        while (*text != '\0') {
-            putchar(*text);
-            text++;
-        }
-        putchar('\n');
+    Line* current = head;
+    while (current != nullptr) {
+        cout << current->text << '\n';
         current = current->next;
     }
 }
 
 void save_text_to_file() {
-    FILE *file = fopen("saved_text.txt", "w");
-    if(file == NULL) {
-        printf("Error opening file.\n");
+    ofstream file("saved_text.txt");
+    if(!file.is_open()) {
+        cout << "Error opening file.\n";
+        return;
     }
 
-    Line *current = head;
-    while(current != NULL) {
-        fprintf(file, "%s\n", current->text);
+    Line* current = head;
+    while(current != nullptr) {
+        file << current->text << '\n';
         current = current->next;
     }
 
-    fclose(file);
-    printf("Text was saved successfully.\n");
+    file.close();
+    cout <<"Text was saved successfully.\n";
 }
 
 void load_text_from_file(const char *filename) {
-    FILE *file = fopen(filename, "r");
-    if(file == NULL) {
-        printf("Error opening file.\n");
+    ifstream file(filename);
+    if(!file.is_open()) {
+        cout << "Error opening file.\n";
         return;
     }
-    char buffer[100];// масив
-    while(fgets(buffer, 100, file) != NULL) {
-        buffer[strcspn(buffer, "\n")] = '\0'; // рахуємо кількість символів до /n і змінюємо на /0
-        Line *new_line = (Line *)malloc(sizeof(Line));
-        new_line->text = strdup(buffer);//текст з буферу копіюється в text
-        new_line->next = NULL;
-        if(head == NULL) {
+
+    delete_all_text();
+    char buffer[100];
+    while(file.getline(buffer, 100)) {
+        Line* new_line = new Line();
+        delete[] new_line->text;
+        new_line->text = new char[strlen(buffer)+1];//текст з буферу копіюється в text
+        strcpy(new_line->text,buffer);
+        if(head == nullptr) {
             head = new_line;
         }
         else {
-            Line *current = head;
-            while(current->next != NULL) {
+            Line* current = head;
+            while(current->next != nullptr) {
                 current = current->next;
             }
             current->next = new_line;
         }
     }
-    fclose(file);
-    printf("Text loaded successfully.\n");
+    file.close();
+    cout << "Text loaded successfully.\n";
 }
 
 void insert_text() {
     int line, index;
     char insert_text[100];
 
-    printf("Choose line and index:(line number index number) ");
-    scanf("%d %d", &line, &index);
-    getchar(); // consume newline character
+    cout << "Choose line and index:(line number index number)";
+    cin >> line >> index;
+    cin.ignore(); // видалення \n
 
-    printf("Enter text to insert: ");
-    fgets(insert_text, 100, stdin);
-    insert_text[strcspn(insert_text, "\n")] = '\0'; //strcspn-calculates the length of the number of characters before \n
+    cout << "Enter text to insert: ";
+    cin.getline(insert_text,100);
 
-    Line *current = head;
-    for (int i = 0; i < line; i++) {
-        if (current == NULL) {
-            printf("Invalid line number.\n");
+    Line *current = get_line(line);
+    for (int i = 0; i < line; ++i) {
+        if (current == nullptr) {
+            cout << "Invalid line number.\n";
             return;
         }
         current = current->next;
     }
 
-    if (current == NULL || index > strlen(current->text)) {
-        printf("Invalid index.\n");
+    if (current == nullptr || index > strlen(current->text)) {
+        cout << "Invalid index.\n";
         return;
     }
 
     int new_length = strlen(current->text) + strlen(insert_text) + 1;
-    char *new_text = (char *)malloc(new_length);
+    char* new_text = new char[new_length];
 
     strncpy(new_text, current->text, index);
     new_text[index] = '\0';
     strcat(new_text, insert_text);
-    strcat(new_text, &current->text[index]);// &-отримання посилання на комірку в пам'яті
+    strcat(new_text, current->text + index);// &-отримання посилання на комірку в пам'яті
 
-    free(current->text);
+    delete[] current->text;
     current->text = new_text;
 
-    printf("Text inserted successfully.\n");
+    cout << "Text inserted successfully.\n";
 }
 
 void find_longest_substring() {
     char substring[100];
-    printf("Enter the substring to search for: ");
-    fgets(substring, 100, stdin);
-    substring[strcspn(substring, "\n")] = '\0';
-    Line *current = head;
+    cout << "Enter the substring to search for: ";
+    cin.getline(substring,100);
+
     int line_number = 0;
     int found = 0;
 
-    while (current != NULL) {
-        char *text = current->text;
-        char *match = strstr(text, substring);//повертає індекс match
+    Line* current = head;
+    while (current != nullptr) {
+        char* text = current->text;
+        char* match = strstr(text, substring);//повертає індекс match
 
-        while (match != NULL) {
+        while (match != nullptr) {
             found = 1;
             int index = match - text; //різниця між адресами
-            printf("Match found at line %d, index %d\n", line_number, index);
+            cout << "Match found at line:" << line_number << '\n';
+            cout << "Match found at index:" << index << '\n';
             match = strstr(match + 1, substring); // Продовжуємо шукати після першого знайденого
         }
 
         current = current->next;
-        line_number++;
+        ++line_number;
     }
 
     if (!found) {
-        printf("No matches found.\n");
+        cout << "No matches found.\n";
     }
 }
 
@@ -259,13 +269,14 @@ void insert_substring() {
     int line, index;
     char insert_text[100];
 
-    printf("Choose line and index to insert the substring (line number index number): ");
-    scanf("%d %d", &line, &index);
-    getchar();
-    printf("Enter the substring to insert: ");
-    fgets(insert_text, 100, stdin);
-    insert_text[strcspn(insert_text, "\n")] = '\0';
-    Line *current = head;
+    cout << "Choose line and index to insert the substring (line number index number): ";
+    cin >> line >> index;
+    cin.ignore();
+
+    cout << "Enter the substring to insert: ";
+    cin.getline(insert_text,100);
+
+    Line* current = get_line(line);
 
     for (int i = 0; i < line; i++) {
         if (current == NULL) {
@@ -281,7 +292,7 @@ void insert_substring() {
     }
 
     int new_length = strlen(current->text) + strlen(insert_text) + 1;
-    char *new_text = (char *)malloc(new_length);
+    char *new_text = new char[new_length];
 
 
     strncpy(new_text, current->text, index);
@@ -289,36 +300,45 @@ void insert_substring() {
 
     strcat(new_text, insert_text);
 
-    strcat(new_text, &current->text[index]);
-    //звільняємо старий текст записуємо новий
-    free(current->text);
+    strcat(new_text, current->text + index);
+    new_text[index]= '\0';
+    strcat(new_text, insert_text);
+    strcat(new_text,current ->text + index);
+
+    delete[] current->text;
     current->text = new_text;
 
-    printf("Substring inserted successfully.\n");
+    cout << "Substring inserted successfully.\n";
 }
 
 void delete_all_text() {
-    free_memory();
-    head = NULL;
-    printf("All text has been cleared.\n");
+    Line* current = head;
+    while (current != nullptr) {
+        Line* next = current->next;
+        delete current;
+        current = next;
+    }
+    head = nullptr;
+    cout << "All text deleted.\n";
 }
 
 void clean_console() {
     system("cls");
+    cout << "Console cleare.\n";
 }
 
 void print_help() {
-    printf("Commands:\n");
-    printf("0: Exit\n");
-    printf("1: Write your text\n");
-    printf("2: Start new line\n");
-    printf("3: Print your current text\n");
-    printf("4: Save text to file: saved_text\n");
-    printf("5: Load text from file\n");
-    printf("6: Insert text\n");
-    printf("7: Find longest substring\n");
-    printf("8: Insert_substring\n");
-    printf("9: Help\n");
-    printf("10: Delete all text\n");
-    printf("11: Clean console\n");
+    cout << "Commands:\n";
+    cout << "0 - Exit\n";
+    cout << "1 - Write text\n";
+    cout << "2 - Start new line\n";
+    cout << "3 - Print text\n";
+    cout << "4 - Save text to file\n";
+    cout << "5 - Load text from file\n";
+    cout << "6 - Insert text\n";
+    cout << "7 - Find longest substring\n";
+    cout << "8 - Insert substring\n";
+    cout << "9 - Print help\n";
+    cout << "10 - Delete all text\n";
+    cout << "11 - Clean console\n";
 }
