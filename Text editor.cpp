@@ -1,5 +1,5 @@
 #include <iostream>
-#include <fstream>
+#include <fstream> // доступ до класу ofstream, ifstream
 #include <string>
 #include <cstdlib>
 #include <cstring>
@@ -24,8 +24,9 @@ public:
 
 // поінтер
 Line *head = nullptr;
-stack<Line*> undoStack;
-stack<Line*> redoStack;
+char* buffer = nullptr;
+stack<Line*> undo_stack;
+stack<Line*> redo_stack;
 const char *filename = "C:\\Users\\Professional\\Desktop\\оп\\assignment-four-hanna_bila_victoria_loziak\\sherlock.txt";
 
 void write_text();
@@ -41,10 +42,12 @@ void insert_substring();
 void undo();
 void redo();
 Line* clone_text();
-void restore_text(Line* state);
+void restore_text(Line* number);
 void delete_all_text();
 void clean_console();
-void delete_text_by_range();
+void cut();
+void copy(int line_number, int start_idx, int end_idx);
+void paste();
 
 int main() {
     int command;
@@ -54,7 +57,12 @@ int main() {
     while (true) {
         cout << "Choose the command:\n";
         cin >> command;
-        cin.ignore(); // To remove the newline character left in the input buffer
+        cin.ignore(); // забираємо '\n'
+
+        if(!(command > 0 && command < 17)) {
+            cout << "Invalid command.\n";
+            continue;
+        }
 
         switch (command) {
             case 0:
@@ -100,7 +108,16 @@ int main() {
                 redo();
                 break;
             case 14:
-                delete_text_by_range();
+                cut();
+                break;
+            case 15:
+                cout << "Enter the line number, start index, and end index (line_number start_idx end_idx): ";
+                int line_number, start_idx, end_idx;
+                cin >> line_number >> start_idx >> end_idx;
+                copy(line_number,start_idx,end_idx);
+                break;
+            case 16:
+                paste();
                 break;
             default:
                 cout << "The command is not implemented.\n";
@@ -125,8 +142,8 @@ void write_text() {
         head = new Line;
     }
 
-    undoStack.push(clone_text());
-    while(!redoStack.empty()) redoStack.pop(); // очищаємо redoStack
+    undo_stack.push(clone_text());
+    while(!redo_stack.empty()) redo_stack.pop(); // очищаємо redoStack
 
     Line* current = head;
     while (current->next != nullptr) {
@@ -171,7 +188,7 @@ void print_text() {
 }
 
 void save_text_to_file() {
-    ofstream file("saved_text.txt");
+    ofstream file("saved_text.txt"); //output file stream
     if(!file.is_open()) {
         cout << "Error opening file.\n";
         return;
@@ -184,17 +201,16 @@ void save_text_to_file() {
     }
 
     file.close();
-    cout <<"Text was saved successfully.\n";
+    cout << "Text was saved successfully.\n";
 }
 
 void load_text_from_file(const char *filename) {
-    ifstream file(filename);
+    ifstream file(filename); //input file stream
     if(!file.is_open()) {
         cout << "Error opening file.\n";
         return;
     }
 
-    delete_all_text();
     char buffer[100];
     while(file.getline(buffer, 100)) {
         Line* new_line = new Line();
@@ -221,11 +237,11 @@ void insert_text() {
     char insert_text[100];
     char mode; // щоб вибрати мод як вставити текст
 
-    cout << "Choose line and index:(line number index number)";
+    cout << "Choose line and index(example: 1 10): ";
     cin >> line >> index;
     cin.ignore(); // видалення \n
 
-    cout << "Enter i or r: ";
+    cout << "Enter insert or replace(i or r): ";
     cin >> mode;
     cin.ignore();
 
@@ -237,6 +253,7 @@ void insert_text() {
         cout << "Invalid line number.\n";
         return;
     }
+
     if (index > strlen(current->text)) {
         cout << "Invalid index.\n";
         return;
@@ -246,10 +263,10 @@ void insert_text() {
         int new_length = strlen(current->text) + strlen(insert_text) + 1;
         char* new_text = new char[new_length];
 
-        strncpy(new_text, current->text, index);
+        strncpy(new_text, current->text, index); //копіювання символів з одного рядка в інший:destination,source,number
         new_text[index] = '\0';
         strcat(new_text, insert_text);
-        strcat(new_text, current->text + index);// &-отримання посилання на комірку в пам'яті
+        strcat(new_text, current->text + index);
 
         delete[] current->text;
         current->text = new_text;
@@ -316,21 +333,21 @@ void insert_substring() {
 
     Line* current = get_line(line);
 
-    for (int i = 0; i < line; i++) {
-        if (current == NULL) {
-            printf("Invalid line number.\n");
+    for (int i = 0; i < line; ++i) {
+        if (current == nullptr) {
+            cout << "Invalid line number.\n";
             return;
         }
         current = current->next;
     }
 
-    if (current == NULL || index > strlen(current->text)) {
+    if (current == nullptr || index > strlen(current->text)) {
         printf("Invalid index.\n");
         return;
     }
 
     int new_length = strlen(current->text) + strlen(insert_text) + 1;
-    char *new_text = new char[new_length];
+    char* new_text = new char[new_length];
 
 
     strncpy(new_text, current->text, index);
@@ -350,27 +367,29 @@ void insert_substring() {
 }
 
 void undo() {
-    if(undoStack.empty()) {
+    if(undo_stack.empty()) {
         cout << "Nothing to return to.\n";
         return;
     }
 
-    redoStack.push((clone_text()));
-    Line* previous_text = undoStack.top();
-    undoStack.pop();
+    redo_stack.push(clone_text());
+
+    Line* previous_text = undo_stack.top();
+    undo_stack.pop();
     restore_text(previous_text);
     cout << "Returned to previous text.\n";
 }
 
 void redo() {
-    if(redoStack.empty()) {
+    if(redo_stack.empty()) {
         cout << "Nothing to return to.\n";
         return;
     }
 
-    undoStack.push(clone_text());
-    Line* next = redoStack.top();
-    redoStack.pop();
+    undo_stack.push(clone_text());
+
+    Line* next = redo_stack.top();
+    redo_stack.pop();
     restore_text(next);
     cout << "Redo successfully.\n";
 }
@@ -400,15 +419,15 @@ Line* clone_text() {
     return new_head;
 }
 
-void restore_text(Line* state) {
+void restore_text(Line* number) {
     delete_all_text();
 
-    if (state == nullptr) {
+    if (number == nullptr) {
         return;
     }
 
     head = new Line();
-    Line* current = state;
+    Line* current = number;
     Line* new_current = head;
     while (current != nullptr) {
         delete[] new_current->text;
@@ -426,11 +445,33 @@ void restore_text(Line* state) {
     }
 }
 
-void delete_text_by_range() {
+void copy(int line_number, int start_idx, int end_idx) {
 
+    Line* line = get_line(line_number);
+    if (line == nullptr || start_idx < 0 || end_idx >= strlen(line->text)) {
+        cout << "Invalid selection.\n";
+        return;
+    }
+
+    int length = end_idx - start_idx + 1;
+    if (length <= 0) {
+        cout << "Invalid selection.\n";
+        return;
+    }
+
+    buffer = new char[length + 1];
+    strncpy(buffer, line->text + start_idx, length);
+    buffer[length] = '\0';
+
+    cout << "Text copied to clipboard.\n";
+}
+
+void cut() {
     int line_number, start_idx, end_idx;
-    cout << "Enter the line number, start index, and end index (line_number start_idx end_idx): ";
+    cout << "Enter the line number, start index, and end index (line_number start end): ";
     cin >> line_number >> start_idx >> end_idx;
+
+    copy(line_number,start_idx,end_idx);
 
     Line* current = get_line(line_number);
 
@@ -445,8 +486,8 @@ void delete_text_by_range() {
         return;
     }
 
-    undoStack.push(clone_text());
-    while (!redoStack.empty()) redoStack.pop();
+    undo_stack.push(clone_text());
+    while (!redo_stack.empty()) redo_stack.pop();
 
     int new_length = text_length - (end_idx - start_idx + 1);
     char* new_text = new char[new_length + 1];
@@ -462,6 +503,35 @@ void delete_text_by_range() {
     cout << "Text deleted successfully.\n";
 }
 
+void paste() {
+    int line_number, index;
+    cout << "Choose line and index to paste the text (line number index number): ";
+    cin >> line_number >> index;
+
+    if (buffer == nullptr) {
+        cout << "Clipboard is empty.\n";
+        return;
+    }
+
+    Line* line = get_line(line_number);
+    if (line == nullptr) {
+        cout << "Invalid line number.\n";
+        return;
+    }
+
+    int new_length = strlen(line->text) + strlen(buffer) + 1;
+    char* new_text = new char[new_length];
+    strncpy(new_text, line->text, index);
+    new_text[index] = '\0';
+    strcat(new_text, buffer);
+    strcat(new_text, line->text + index);
+
+    delete[] line->text;
+    line->text = new_text;
+
+    cout << "Text pasted successfully.\n";
+}
+
 void delete_all_text() {
     Line* current = head;
     while (current != nullptr) {
@@ -470,7 +540,6 @@ void delete_all_text() {
         current = next;
     }
     head = nullptr;
-    cout << "All text deleted.\n";
 }
 
 void clean_console() {
@@ -486,7 +555,7 @@ void print_help() {
     cout << "3 - Print text\n";
     cout << "4 - Save text to file\n";
     cout << "5 - Load text from file\n";
-    cout << "6 - Insert text\n";
+    cout << "6 - Insert or replace text\n";
     cout << "7 - Find longest substring\n";
     cout << "8 - Insert substring\n";
     cout << "9 - Print help\n";
@@ -494,5 +563,7 @@ void print_help() {
     cout << "11 - Clean console\n";
     cout << "12 - Undo\n";
     cout << "13 - Redo\n";
-    cout << "14 - Delete text by range\n";
+    cout << "14 - Cut\n";
+    cout << "15 - Copy\n";
+    cout << "16 - Paste\n";
 }
