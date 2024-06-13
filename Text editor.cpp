@@ -39,6 +39,9 @@ public:
     void insert_substring();
     void undo();
     void redo();
+    void cut();
+    void copy(int line_number, int start_idx, int end_idx);
+    void paste();
     void delete_all_text();
     void clean_console();
     void delete_text_by_range();
@@ -46,15 +49,16 @@ public:
 
 private:
     Line* head;
+    char* buffer = nullptr;
     stack<Line*> undoStack;
     stack<Line*> redoStack;
 
     Line* get_line(int line_number);
     Line* clone_text();
-    void restore_text(Line* state);
+    void restore_text(Line* number);
 };
 
-TextEditor::TextEditor() : head(nullptr), filename("C:\\Users\\Professional\\Desktop\\оп\\assignment-four-hanna_bila_victoria_loziak\\sherlock.txt") {}
+TextEditor::TextEditor():head(nullptr), filename("C:\\Users\\Professional\\Desktop\\оп\\assignment-four-hanna_bila_victoria_loziak\\sherlock.txt") {}
 
 TextEditor::~TextEditor() {
     delete_all_text();
@@ -336,15 +340,15 @@ Line* TextEditor::clone_text() {
     return new_head;
 }
 
-void TextEditor::restore_text(Line* state) {
+void TextEditor::restore_text(Line* number) {
     delete_all_text();
 
-    if (state == nullptr) {
+    if (number == nullptr) {
         return;
     }
 
     head = new Line();
-    Line* current = state;
+    Line* current = number;
     Line* new_current = head;
     while (current != nullptr) {
         delete[] new_current->text;
@@ -362,23 +366,48 @@ void TextEditor::restore_text(Line* state) {
     }
 }
 
-void TextEditor::delete_text_by_range() {
+void TextEditor::copy(int line_number, int start_idx, int end_idx) {
+
+    Line* line = get_line(line_number);
+    if (line == nullptr || start_idx < 0 || end_idx >= strlen(line->text)) {
+        cout << "Invalid selection.\n";
+        return;
+    }
+
+    int length = end_idx - start_idx + 1;
+    if (length <= 0) {
+        cout << "Invalid selection.\n";
+        return;
+    }
+
+    buffer = new char[length + 1];
+    strncpy(buffer, line->text + start_idx, length);
+    buffer[length] = '\0';
+
+    cout << "Text copied to clipboard.\n";
+}
+
+void TextEditor::cut() {
     int line_number, start_idx, end_idx;
-    cout << "Enter the line number, start index, and end index (line_number start_idx end_idx): ";
+    cout << "Enter the line number, start index, and end index (line_number start end): ";
     cin >> line_number >> start_idx >> end_idx;
+
+    copy(line_number,start_idx,end_idx);
 
     Line* current = get_line(line_number);
 
     if (current == nullptr) {
-        cout << "Invalid line number.\n";
-        return;
-    }
+        {
+            return;
+        }
 
-    int text_length = strlen(current->text);
-    if (start_idx >= text_length || end_idx >= text_length || start_idx > end_idx) {
-        cout << "Invalid start or end index.\n";
-        return;
-    }
+        undoStack.push(clone_text());
+        while (!redoStack.empty()) redoStack.pop();
+
+        int new_length = text_length - (end_idx - start_idx + 1);
+        char* new_text = new char[new_length + 1];
+            cout << "Text deleted successfully.\n";
+        }
 
     undoStack.push(clone_text());
     while (!redoStack.empty()) redoStack.pop();

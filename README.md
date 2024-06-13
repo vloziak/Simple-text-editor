@@ -45,3 +45,17 @@
 
 ![example2.1](https://github.com/vloziak/Simple-text-editor/blob/main/Example2.png?raw=true, "example2.1")
 ![example2.2](https://github.com/vloziak/Simple-text-editor/blob/main/Example2.2.png?raw=true, "example2.2")
+
+-----------------
+
+# Assignment 2: Simple Text Editor: the basics of object oriented programming
+## Опис 2 практичної:
+
+У другому завданні ми розширили простий текстовий редактор, використовуючи принципи об'єктно-орієнтованого програмування (ООП) на мові C++.
+
+## Додані функції:
+
+- **insert_text** (доданий режим replacement);
+- **undo** (повернення до попереднього стану тексту);
+- **redo** (відновлення стану після undo);
+- **cut** ()
