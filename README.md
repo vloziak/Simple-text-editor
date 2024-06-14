@@ -62,7 +62,7 @@
 - **copy** (скопіювати текст);
 - **paste** (вставити текст);
 
-![commands](https://github.com/vloziak/Simple-text-editor/blob/main/Commands.png?raw=true,"commands")
+![commands](https://github.com/vloziak/Simple-text-editor/blob/main/%D0%97%D0%BD%D1%96%D0%BC%D0%BE%D0%BA%20%D0%B5%D0%BA%D1%80%D0%B0%D0%BD%D0%B0%20(126).png?raw=true, "commands")
 
 -----------------
 
@@ -76,9 +76,9 @@
 4. Paste
 5. Redo
 
-![commands]("https://github.com/vloziak/Simple-text-editor/blob/main/%D0%97%D0%BD%D1%96%D0%BC%D0%BE%D0%BA%20%D0%B5%D0%BA%D1%80%D0%B0%D0%BD%D0%B0%20(127).png?raw=true")
+![commands](https://github.com/vloziak/Simple-text-editor/blob/main/%D0%97%D0%BD%D1%96%D0%BC%D0%BE%D0%BA%20%D0%B5%D0%BA%D1%80%D0%B0%D0%BD%D0%B0%20(127).png?raw=true, "example")
 
-![commands]("https://github.com/vloziak/Simple-text-editor/blob/main/%D0%97%D0%BD%D1%96%D0%BC%D0%BE%D0%BA%20%D0%B5%D0%BA%D1%80%D0%B0%D0%BD%D0%B0%20(128).png?raw=true")
+![commands](https://github.com/vloziak/Simple-text-editor/blob/main/%D0%97%D0%BD%D1%96%D0%BC%D0%BE%D0%BA%20%D0%B5%D0%BA%D1%80%D0%B0%D0%BD%D0%B0%20(128).png?raw=true, "example")
 
 # Example 4:
 
@@ -88,6 +88,6 @@
 4. Paste
 5. Replace
 
-![commands]("https://github.com/vloziak/Simple-text-editor/blob/main/%D0%97%D0%BD%D1%96%D0%BC%D0%BE%D0%BA%20%D0%B5%D0%BA%D1%80%D0%B0%D0%BD%D0%B0%20(129).png?raw=true")
+![commands](https://github.com/vloziak/Simple-text-editor/blob/main/%D0%97%D0%BD%D1%96%D0%BC%D0%BE%D0%BA%20%D0%B5%D0%BA%D1%80%D0%B0%D0%BD%D0%B0%20(129).png?raw=true, "example")
 
-![commands]("https://github.com/vloziak/Simple-text-editor/blob/main/%D0%97%D0%BD%D1%96%D0%BC%D0%BE%D0%BA%20%D0%B5%D0%BA%D1%80%D0%B0%D0%BD%D0%B0%20(130).png?raw=true")
+![commands](https://github.com/vloziak/Simple-text-editor/blob/main/%D0%97%D0%BD%D1%96%D0%BC%D0%BE%D0%BA%20%D0%B5%D0%BA%D1%80%D0%B0%D0%BD%D0%B0%20(130).png?raw=true, "example")
