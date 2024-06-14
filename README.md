@@ -19,7 +19,7 @@
 ![commands](https://github.com/vloziak/Simple-text-editor/blob/main/Commands.png?raw=true,"commands")
 
 -----
-## Example Usage :smiley:
+## Example Usage 1 :smiley:
 
 ### Example 1:
 
@@ -58,4 +58,36 @@
 - **insert_text** (доданий режим replacement);
 - **undo** (повернення до попереднього стану тексту);
 - **redo** (відновлення стану після undo);
-- **cut** ()
+- **cut** (видалення тексту);
+- **copy** (скопіювати текст);
+- **paste** (вставити текст);
+
+![commands](https://github.com/vloziak/Simple-text-editor/blob/main/Commands.png?raw=true,"commands")
+
+-----------------
+
+## Example Usage 2 :smiley:
+
+# Example 3:
+
+1. Write text
+2. Cut
+3. Undo
+4. Paste
+5. Redo
+
+![commands]("https://github.com/vloziak/Simple-text-editor/blob/main/%D0%97%D0%BD%D1%96%D0%BC%D0%BE%D0%BA%20%D0%B5%D0%BA%D1%80%D0%B0%D0%BD%D0%B0%20(127).png?raw=true")
+
+![commands]("https://github.com/vloziak/Simple-text-editor/blob/main/%D0%97%D0%BD%D1%96%D0%BC%D0%BE%D0%BA%20%D0%B5%D0%BA%D1%80%D0%B0%D0%BD%D0%B0%20(128).png?raw=true")
+
+# Example 4:
+
+1. Write text
+2. New line
+3. Copy
+4. Paste
+5. Replace
+
+![commands]("https://github.com/vloziak/Simple-text-editor/blob/main/%D0%97%D0%BD%D1%96%D0%BC%D0%BE%D0%BA%20%D0%B5%D0%BA%D1%80%D0%B0%D0%BD%D0%B0%20(129).png?raw=true")
+
+![commands]("https://github.com/vloziak/Simple-text-editor/blob/main/%D0%97%D0%BD%D1%96%D0%BC%D0%BE%D0%BA%20%D0%B5%D0%BA%D1%80%D0%B0%D0%BD%D0%B0%20(130).png?raw=true")
