@@ -9,7 +9,6 @@
 using namespace std;
 
 
-
 class Text {
 public:
     char* text;
@@ -21,28 +20,6 @@ public:
     }
     ~Text() {
         delete[] text;
-    }
-
-    Text* convertStringToLinkedList(string& str) {
-        Text* head = nullptr;
-        Text* current = nullptr;
-
-        for (int i = 0; str[i] != '\0'; ++i) {
-            Text* newNode = new Text();
-
-            newNode->text = new char[2];
-            newNode->text[0] = str[i];
-            newNode->text[1] = '\0';
-
-            if (head == nullptr) {
-                head = newNode;
-                current = head;
-            } else {
-                current->next = newNode;
-                current = newNode;
-            }
-        }
-       return head;
     }
 };
 
@@ -529,6 +506,11 @@ public:
         head = caesar.encryptText(convertToString(head), key);
     }
 
+    void decrypt(int key) {
+        Caesar caesar;
+        head = caesar.decrypt(convertToString(head), key);
+    }
+
     void encryptFile(char inFile[25], char outFile[25], int key) {
         Caesar cipher;
         size_t chunkSize = 128;
@@ -556,12 +538,9 @@ public:
                     length += strlen(current->text);
                     current = current->next;
                 }
+                char* result = new char[length];
+                result[0] = '\0';
 
-                // Allocate memory for the resulting string
-                char* result = new char[length]; // +1 for the null terminator
-                result[0] = '\0'; // Initialize the result string
-
-                // Second pass to concatenate the characters into the result string
                 current = encryptedText;
                 while (current != nullptr) {
                     strcat(result, current->text);
@@ -605,11 +584,9 @@ public:
                     current = current->next;
                 }
 
-                // Allocate memory for the resulting string
-                char* result = new char[length]; // +1 for the null terminator
-                result[0] = '\0'; // Initialize the result string
+                char* result = new char[length];
+                result[0] = '\0';
 
-                // Second pass to concatenate the characters into the result string
                 current = encryptedText;
                 while (current != nullptr) {
                     strcat(result, current->text);
@@ -625,16 +602,10 @@ public:
         outputFile.close();
     }
 
-    void decrypt(int key) {
-        Caesar caesar;
-        head = caesar.decrypt(convertToString(head), key);
-    }
-
     void clean_console() {
         system("cls");
         cout << "Console cleare.\n";
     }
-
 
     void print_help() {
         cout << "Commands:\n";
